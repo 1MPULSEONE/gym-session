@@ -1,0 +1,167 @@
+@startuml
+
+actor       User as User
+
+boundary Frontend as Frontend
+control Backend as Backend
+entity AuthenticationService as AuthenticationService
+database SQL_Database as SQL_Database
+entity NotificationService as NotificationService
+entity PaymentServce as PaymentService
+entity S3_Storage as Storage
+
+group AuthenticationProcess
+    User -> Frontend: SignIn 
+    Frontend -> AuthenticationService: POST /auth/login(authData)
+    AuthenticationService -> SQL_Database: Comparing data
+    SQL_Database -> AuthenticationService: Return status
+    AuthenticationService -> Frontend: UserData + AccessToken + RefreshToken
+end
+
+group Users
+    group GetUsers
+        User -> Frontend: GetUsers 
+        Frontend -> AuthenticationService: GET /user
+        AuthenticationService -> SQL_Database: Getting users
+        SQL_Database -> AuthenticationService: Return users
+        AuthenticationService -> Frontend: UsersData
+    end
+      group DeleteUser
+        User -> Frontend: DeleteUsers 
+        Frontend -> AuthenticationService: DELETE /user/[userId]
+        AuthenticationService -> SQL_Database: Delete user
+        SQL_Database -> AuthenticationService: Return deleted user id
+        AuthenticationService -> Frontend: UserId
+    end
+      group EditUser
+        User -> Frontend: Edit user 
+        Frontend -> AuthenticationService: PATCH /user/[userId]
+        AuthenticationService -> SQL_Database: Edit user
+        SQL_Database -> AuthenticationService: Return user
+        AuthenticationService -> Frontend: UsersData
+    end
+end
+
+
+group Profiles
+
+    group GetProfiles
+    User -> Frontend: GetProfile 
+    Frontend -> Backend: GET /profile/[userId]
+    Backend -> SQL_Database: Get data from database
+    SQL_Database -> Backend: Return profiles
+    Backend -> Frontend: ProfilesData
+    end
+
+
+    group GetClientProfile
+        User -> Frontend: GetClientProfile 
+        Frontend -> Backend: GET /profile/client/[userId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return profile
+        Backend -> Frontend: ClientProfileData
+    end
+
+    group GetAdminProfile
+        User -> Frontend: GetProfile 
+        Frontend -> Backend: GET /profile/admin/[userId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return profile
+        Backend -> Frontend: AdminProfileData
+    end
+
+    group GetCoachProfile
+        User -> Frontend: GetCoachProfile 
+        Frontend -> Backend: GET /profile/coach/[userId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return profile
+        Backend -> Frontend: CoachProfileData
+    end
+
+    group DeleteClientProfile
+        User -> Frontend: Delete ClientProfile 
+        Frontend -> Backend: DELETE /profile/client/[userId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return deleted profile id
+        Backend -> Frontend: ClientId
+    end
+
+    group DeleteCoachProfile
+        User -> Frontend: Delete CoachProfile 
+        Frontend -> Backend: DELETE /profile/client/[userId]
+             Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return deleted profile id
+            Backend -> Frontend: ClientId
+    end
+end
+
+ group Diaries 
+  group GetDiaries
+        User -> Frontend: Get Diaries 
+        Frontend -> Backend: GET /diary/[userId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return diaries
+        Backend -> Frontend: DiariesData
+  end
+    group GetTrainingDiaryData
+        User -> Frontend: Get TrainingDiary 
+        Frontend -> Backend: GET /diary/training/[diaryId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return training diary
+        Backend -> Frontend: TrainingDiaryData
+    end
+    group GetCourseDiaryData
+        User -> Frontend: Get CourseDiary 
+        Frontend -> Backend: GET /diary/course/[diaryId]
+        Backend -> SQL_Database: Get data from database
+        SQL_Database -> Backend: Return course diary
+        Backend -> Frontend: CoursewDiaryData
+    end
+    group CreateTrainingDiary
+        User -> Frontend: Create TrainingDiary 
+        Frontend -> Backend: POST /diary/training/[diaryId]
+        Backend -> SQL_Database: Put data in database
+        SQL_Database -> Backend: Return training diary
+        Backend -> Frontend: TrainingDiariyData
+    end
+        group CreateCourseDiary
+        User -> Frontend: Create CourseDiary 
+        Frontend -> Backend: POST /diary/course/[diaryId]
+        Backend -> SQL_Database: Put data in database
+        SQL_Database -> Backend: Return training diary
+        Backend -> Frontend: CourseDiariyData
+    end
+    group DeleteTrainingDiary
+        User -> Frontend: Delete TrainingDiary 
+        Frontend -> Backend: DELETE /diary/training/[diaryId]
+        Backend -> SQL_Database: Delete data in database
+        SQL_Database -> Backend: Return training diary id
+        Backend -> Frontend: TrainingDiaryId
+    end
+        group DeleteCourseDiary
+        User -> Frontend: Create CourseDiary 
+        Frontend -> Backend: DELETE /diary/course/[diaryId]
+        Backend -> SQL_Database: Delete data in database
+        SQL_Database -> Backend: Return training diary
+        Backend -> Frontend: CourseDiaryId
+    end
+        group EditTrainingDiary
+        User -> Frontend: Edit TrainingDiary 
+        Frontend -> Backend: PATCH /diary/training/[diaryId]
+        Backend -> SQL_Database: Edit data in database
+        SQL_Database -> Backend: Return training diary
+        Backend -> Frontend: TrainingDiariyData
+    end
+        group DeleteCourseDiary
+        User -> Frontend: Edit CourseDiary 
+        Frontend -> Backend: PATCH /diary/course/[diaryId]
+        Backend -> SQL_Database: Edit data in database
+        SQL_Database -> Backend: Return training diary
+        Backend -> Frontend: CourseDiariyData
+    end
+  end
+
+
+
+
+@enduml
