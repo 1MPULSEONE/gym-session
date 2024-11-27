@@ -7,7 +7,7 @@ control Backend as Backend
 entity AuthenticationService as AuthenticationService
 database SQL_Database as SQL_Database
 entity NotificationService as NotificationService
-entity PaymentServce as PaymentService
+entity PaymentService as PaymentService
 entity S3_Storage as Storage
 
 group AuthenticationProcess
@@ -17,7 +17,29 @@ group AuthenticationProcess
     SQL_Database -> AuthenticationService: Return status
     AuthenticationService -> Frontend: UserData + AccessToken + RefreshToken
 end
-
+group EnrollPaidCourseProcess
+    User -> Frontend: Get courses
+    Frontend -> Backend: GET /courses/[limit,skip]
+    Backend -> SQL_Database: Get data from database
+    SQL_Database -> Backend: Return courses
+    Backend -> Frontend: Return CoursesData
+    Frontend -> S3_Storage: GET /[courseImgUrl] 
+    S3_Storage -> Frontend: Return image for course
+    Frontend -> Backend: POST /courses/payment/[courseId]
+    Backend -> PaymentService: Create payment intent
+    PaymentService -> Backend: Return payment session ID and client secret
+    Backend -> Frontend: Return payment session ID and client secret
+    Frontend -> PaymentService: Initiate payment (redirect to payment page)
+    PaymentService -> Frontend: Redirect to payment page
+    Frontend -> PaymentService: Complete payment (e.g., enter card details)
+    PaymentService -> Backend: Payment successful
+    Backend -> SQL_Database: Update course enrollment status
+    SQL_Database -> Backend: Enrollment updated
+    Backend -> NotificationService: Send enrollment confirmation
+    NotificationService -> User: Send email/push notification
+    Backend -> Frontend: Payment successful
+    Frontend -> User: Show success message
+end
 group Users
     group GetUsers
         User -> Frontend: GetUsers 
