@@ -8,7 +8,6 @@ public record TrainingDiary(
         Integer userId,
         @NotEmpty
         String name,
-        @NotEmpty
         SportType sportType
 ) {
 }
