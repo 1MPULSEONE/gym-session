@@ -1,13 +1,14 @@
 package com.lovejazz.gymsession.model;
 
-
 import jakarta.validation.constraints.NotEmpty;
 
-public record TrainingDiary(
-        Integer id,
-        Integer userId,
+public record User(
         @NotEmpty
-        String name,
-        SportType sportType
+        Integer id,
+        @NotEmpty
+        String phoneNumber,
+        @NotEmpty
+        String password
 ) {
+
 }
