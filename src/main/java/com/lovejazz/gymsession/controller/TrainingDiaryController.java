@@ -1,55 +1,50 @@
 package com.lovejazz.gymsession.controller;
 
-import com.lovejazz.gymsession.model.TrainingDiary;
-import com.lovejazz.gymsession.repository.TrainingDiaryRepository;
-import com.lovejazz.gymsession.utils.exceptions.RunNotFoundExceptions;
+import com.lovejazz.gymsession.model.trainingDiary.TrainingDiaryDAO;
+import com.lovejazz.gymsession.service.TrainingDiaryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/trainingDiary")
 public class TrainingDiaryController {
 
-    private final TrainingDiaryRepository trainingDiaryRepository;
+    private final TrainingDiaryService trainingDiaryService;
 
-    public TrainingDiaryController(TrainingDiaryRepository repository) {
-        this.trainingDiaryRepository = repository;
+    public TrainingDiaryController(TrainingDiaryService service) {
+        this.trainingDiaryService = service;
     }
 
     @GetMapping("")
-    List<TrainingDiary> findAll() {
-        return trainingDiaryRepository.findAll();
+    List<TrainingDiaryDAO> findAll() {
+        return trainingDiaryService.findAll();
     }
 
     @GetMapping("/{id}")
-    TrainingDiary findById(@PathVariable Integer id) {
-        Optional<TrainingDiary> trainingDiary = trainingDiaryRepository.findById(id);
-        if (trainingDiary.isEmpty()) {
-            throw new RunNotFoundExceptions();
-        }
-        return trainingDiary.get();
+    TrainingDiaryDAO findById(@PathVariable Integer id) {
+        TrainingDiaryDAO trainingDiary = trainingDiaryService.findById(id);
+        return trainingDiary;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    void create(@Valid @RequestBody TrainingDiary diary) {
-        trainingDiaryRepository.create(diary);
+    void create(@Valid @RequestBody TrainingDiaryDAO diary) {
+        trainingDiaryService.create(diary);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    void update(@Valid @RequestBody TrainingDiary diary, @PathVariable Integer id) {
-        trainingDiaryRepository.update(diary, id);
+    void update(@Valid @RequestBody TrainingDiaryDAO diary, @PathVariable Integer id) {
+        trainingDiaryService.update(diary, id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     void delete(@PathVariable Integer id) {
-        trainingDiaryRepository.delete(id);
+        trainingDiaryService.delete(id);
     }
 
 }
