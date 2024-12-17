@@ -7,3 +7,5 @@ services:
       - 'POSTGRES_USER=admin'
     ports:
       - '5432:5432'
+    volumes:
+      - '/path/to/shared/volume:/var/lib/postgresql/data'
