@@ -3,11 +3,11 @@ VALUES (1,'Gym'),
        (2,'Swimming');
 
 INSERT INTO training_diary (id,user_id, name, sport_type_id)
-VALUES (1,1, 'GymDiary', (SELECT id FROM sport_type WHERE title = 'Gym')),
-       (2,1, 'Swimming', (SELECT id FROM sport_type WHERE title = 'Swimming')),
-       (3,1, 'GymDiary2', (SELECT id FROM sport_type WHERE title = 'Gym')),
-       (4,1, 'Swimming2', (SELECT id FROM sport_type WHERE title = 'Swimming')),
-       (5,1, 'GymDiary3', (SELECT id FROM sport_type WHERE title = 'Gym'));
+VALUES (1,4, 'GymDiary', (SELECT id FROM sport_type WHERE title = 'Gym')),
+       (2,4, 'Swimming', (SELECT id FROM sport_type WHERE title = 'Swimming')),
+       (3,4, 'GymDiary2', (SELECT id FROM sport_type WHERE title = 'Gym')),
+       (4,4, 'Swimming2', (SELECT id FROM sport_type WHERE title = 'Swimming')),
+       (5,4, 'GymDiary3', (SELECT id FROM sport_type WHERE title = 'Gym'));
 
 INSERT INTO role (id, name)
 VALUES (1, 'ROLE_ADMIN'),

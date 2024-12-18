@@ -4,10 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.lovejazz.gymsession.model.role.Role;
 import com.lovejazz.gymsession.model.user.User;
-import com.lovejazz.gymsession.repository.RoleRepository;
-import com.lovejazz.gymsession.repository.UserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
