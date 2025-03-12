@@ -1,16 +1,15 @@
 package com.lovejazz.gymsession.config;
 
+import com.lovejazz.gymsession.converters.JwtAuthConverter;
 import com.lovejazz.gymsession.security.jwt.AuthEntryPointJwt;
 import com.lovejazz.gymsession.security.jwt.AuthTokenFilter;
 import com.lovejazz.gymsession.security.jwt.JwtUtils;
 import com.lovejazz.gymsession.security.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -31,11 +30,13 @@ public class WebSecurityConfig {
     private final AuthEntryPointJwt unauthorizedHandler;
 
     private final JwtUtils jwtUtils;
+    private final JwtAuthConverter jwtAuthConverter;
 
-    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, JwtUtils jwtUtils) {
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt unauthorizedHandler, JwtUtils jwtUtils, JwtAuthConverter jwtAuthConverter) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
         this.jwtUtils = jwtUtils;
+        this.jwtAuthConverter = jwtAuthConverter;
     }
 
     @Bean
@@ -72,6 +73,11 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/test/**").authenticated()
                                 .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(jwtAuthConverter)
+                        )
                 );
 
         http.authenticationProvider(authenticationProvider());

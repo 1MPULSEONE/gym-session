@@ -10,8 +10,8 @@ VALUES (1,4, 'GymDiary', (SELECT id FROM sport_type WHERE title = 'Gym')),
        (5,4, 'GymDiary3', (SELECT id FROM sport_type WHERE title = 'Gym'));
 
 INSERT INTO role (id, name)
-VALUES (1, 'ROLE_ADMIN'),
-       (2, 'ROLE_USER');
+VALUES (1, 'client_admin'),
+       (2, 'client_user');
 
 
 --password -> qwerty123

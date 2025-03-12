@@ -22,13 +22,13 @@ public class RoleController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('client_admin')")
     List<Role> findAll() {
         return roleService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('client_admin')")
     Role findById(@PathVariable Integer id) {
         return roleService.findById(id);
     }
@@ -36,21 +36,21 @@ public class RoleController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('client_user')")
     void create(@Valid @RequestBody Role role) {
         roleService.create(role);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('client_user')")
     void update(@Valid @RequestBody Role role, @PathVariable Integer id) {
         roleService.update(role, id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('client_user')")
 
     void delete(@PathVariable Integer id) {
         roleService.delete(id);

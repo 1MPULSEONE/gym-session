@@ -20,34 +20,34 @@ public class SportTypeController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('client_admin')")
     List<SportTypeDAO> findAll() {
         return sportTypeService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_USER') and #id == authentication.principal.id")
+    @PreAuthorize("hasRole('client_user') and #id == authentication.principal.id")
     SportTypeDAO findById(@PathVariable Integer id) {
         return sportTypeService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('client_admin')")
     void create(@Valid @RequestBody SportTypeDAO sportTypeDAO) {
         sportTypeService.create(sportTypeDAO);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('client_admin')")
     void update(@Valid @RequestBody SportTypeDAO sportTypeDAO, @PathVariable Integer id) {
         sportTypeService.update(sportTypeDAO, id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('client_admin')")
 
     void delete(@PathVariable Integer id) {
         sportTypeService.delete(id);
