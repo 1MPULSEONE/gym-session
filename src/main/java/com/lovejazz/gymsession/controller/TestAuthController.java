@@ -74,6 +74,7 @@ public class TestAuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest, HttpServletResponse response) {
+        System.out.println("TEST CONTROLLER");
         try {
             String token = authService.registerAndGetToken(signUpRequest.getUsername(),signUpRequest.getEmail(), signUpRequest.getFirstName(),signUpRequest.getLastName(),signUpRequest.getPassword());
 

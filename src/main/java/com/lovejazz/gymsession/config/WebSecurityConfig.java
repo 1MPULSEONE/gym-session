@@ -2,7 +2,6 @@ package com.lovejazz.gymsession.config;
 
 import com.lovejazz.gymsession.converters.JwtAuthConverter;
 import com.lovejazz.gymsession.security.jwt.AuthEntryPointJwt;
-import com.lovejazz.gymsession.security.jwt.AuthTokenFilter;
 import com.lovejazz.gymsession.security.jwt.JwtUtils;
 import com.lovejazz.gymsession.security.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Configuration
@@ -37,11 +35,6 @@ public class WebSecurityConfig {
         this.unauthorizedHandler = unauthorizedHandler;
         this.jwtUtils = jwtUtils;
         this.jwtAuthConverter = jwtAuthConverter;
-    }
-
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter(userDetailsService, jwtUtils);
     }
 
     @Bean
@@ -83,7 +76,6 @@ public class WebSecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

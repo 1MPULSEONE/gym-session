@@ -6,13 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.lovejazz.gymsession.model.user.SignInDTO;
+import com.lovejazz.gymsession.repository.UserRepository;
 import java.io.IOException;
 import java.util.*;
 
@@ -21,12 +22,15 @@ public class AuthService {
     private final String keycloakClientSecret;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
-    public AuthService(RestTemplate restTemplate,ObjectMapper objectMapper) {
+
+    public AuthService(RestTemplate restTemplate,ObjectMapper objectMapper, UserRepository userRepository) {
         Dotenv dotenv = Dotenv.load();
        this.keycloakClientSecret = dotenv.get("KEYCLOAK_CLIENT_SECRET");
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.userRepository = userRepository;
     }
 
     public String authenticateAndGetToken(String username, String password) {
@@ -89,6 +93,7 @@ public class AuthService {
 
     public String registerAndGetToken(String username, String email, String firstName, String lastName, String password) throws JsonProcessingException {
         String accessToken = this.getUserCreatorToken();
+        System.out.println(accessToken + " - accessToken");
         String url = "http://localhost:8080/admin/realms/develop/users";
 
         HttpHeaders headers = new HttpHeaders();
@@ -123,6 +128,7 @@ public class AuthService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
+//                userRepository.createUser(new SignInDTO(email, username, firstName, lastName));
                 return this.authenticateAndGetToken(username, password);
             } catch (Exception authException) {
                 throw new RuntimeException("User created, but authentication failed: " + authException.getMessage(), authException);

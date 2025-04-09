@@ -14,11 +14,11 @@ VALUES (1, 'client_admin'),
        (2, 'client_user');
 
 
---password -> qwerty123
-    INSERT INTO  user_data (id,password,username)
-    VALUES
-        (3,'$2a$10$H.x3e7KzCdDB5YhoBQ0wm.In0kfR.zxEmS1cr.y49SHEgCR2M.ode','admin'),
-        (4,'$2a$10$H.x3e7KzCdDB5YhoBQ0wm.In0kfR.zxEmS1cr.y49SHEgCR2M.ode','vanya');
+-- --password -> qwerty123
+--     INSERT INTO  user_data (id,password,username)
+--     VALUES
+--         (3,'$2a$10$H.x3e7KzCdDB5YhoBQ0wm.In0kfR.zxEmS1cr.y49SHEgCR2M.ode','admin'),
+--         (4,'$2a$10$H.x3e7KzCdDB5YhoBQ0wm.In0kfR.zxEmS1cr.y49SHEgCR2M.ode','vanya');
 
 INSERT INTO  user_roles (role_id, user_id) VALUES (1,3),(2,4);
 

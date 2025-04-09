@@ -31,8 +31,10 @@ CREATE TABLE IF NOT EXISTS role
 CREATE TABLE IF NOT EXISTS user_data
 (
     id         INT          NOT NULL UNIQUE,
-    password   VARCHAR(256) NOT NULL,
     username      VARCHAR(256) NOT NULL UNIQUE,
+    email      VARCHAR(256) NOT NULL UNIQUE,
+    first_name      VARCHAR(256) NOT NULL,
+    last_name      VARCHAR(256) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
