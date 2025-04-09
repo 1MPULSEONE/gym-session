@@ -39,7 +39,9 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             String servletPath = request.getServletPath();
-            if (servletPath.startsWith("/api/auth/signin") || servletPath.startsWith("/api/auth/signup") || servletPath.startsWith("/api/test/") || servletPath.startsWith("/api/keycloak_auth/signin") || servletPath.startsWith("/api/keycloak_auth/signup") ) {
+            if (servletPath.startsWith("/api/auth/signin") || servletPath.startsWith("/api/auth/signup") || servletPath.startsWith("/api/test/") || servletPath.startsWith("/api/keycloak_auth/signin") || servletPath.startsWith("/api/keycloak_auth/signup") || servletPath.startsWith("/api/logs/info") || servletPath.startsWith("/api/logs/er") || servletPath.startsWith("/api/logs/warn") ) {
+                System.out.println("IN IF");
+
                 // Если это публичный endpoint, пропускаем фильтр без обработки JWT
                 filterChain.doFilter(request, response);
                 return;
