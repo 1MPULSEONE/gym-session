@@ -6,8 +6,10 @@ import com.lovejazz.gymsession.model.user.User;
 import com.lovejazz.gymsession.model.user.UserDTO;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
+
 import java.util.*;
 import java.util.UUID;
+
 import org.springframework.util.Assert;
 
 @Repository
@@ -20,26 +22,22 @@ public class UserRepository {
     }
 
     public Optional<User> findByUserName(String username) {
-       //usrname = dima
-        String query = "SELECT ud.id, ud.username, ud.password, r.id as role_id, r.name as role_name FROM user_data ud JOIN user_roles ur ON ud.id = ur.user_id JOIN role r ON ur.role_id = r.id WHERE ud.username = :username"
-                ;
+        
+        String query = "SELECT ud.id, ud.username, r.id as role_id, r.name as role_name FROM user_data ud JOIN user_roles ur ON ud.id = ur.user_id JOIN role r ON ur.role_id = r.id WHERE ud.username = :username";
         List<UserDTO> userDTOS = jdbcClient.sql(query)
                 .param("username", username)
                 .query((rs, rowNum) -> {
                     Role role = new Role(rs.getInt("role_id"), rs.getString("role_name"));
-                    return new UserDTO(rs.getInt("id"),
-                            rs.getString("password"),
+                    UUID userId = rs.getObject("id", UUID.class);
+                    return new UserDTO(
+                            userId,
                             rs.getString("username"),
                             role);
                 }).list();
-//        if(true) {
-//            throw new IllegalStateException("userDTOS" + userDTOS);
-//        }
         if (userDTOS.isEmpty()) {
             return Optional.empty();
         }
-        //dima admin , dima admin -> User(dima , [admin,admin])
-        Map<Integer, List<UserDTO>> userDTOMap = new HashMap<>();
+        Map<UUID, List<UserDTO>> userDTOMap = new HashMap<>();
         for (UserDTO userDTO : userDTOS) {
             userDTOMap.computeIfAbsent(userDTO.id(), k -> new ArrayList<>()).add(userDTO);
         }
@@ -48,29 +46,29 @@ public class UserRepository {
             throw new IllegalStateException("Multiple users found with username: " + username);
         }
 
-        Map.Entry<Integer, List<UserDTO>> entry = userDTOMap.entrySet().iterator().next();
+        Map.Entry<UUID, List<UserDTO>> entry = userDTOMap.entrySet().iterator().next();
         List<UserDTO> userDTOList = entry.getValue();
 
-        // Берем данные первого UserDTO для полей id, password, username (они одинаковые для всех)
         UserDTO firstUserDTO = userDTOList.getFirst();
 
-        // Собираем список ролей
         List<Role> roles = new ArrayList<>();
         for (UserDTO userDTO : userDTOList) {
             roles.add(userDTO.role());
         }
 
-        // Создаем и возвращаем User
-        return Optional.of(new User(firstUserDTO.id(), firstUserDTO.password(), firstUserDTO.username(), roles));
+        return Optional.of(new User(
+                firstUserDTO.id(),
+                firstUserDTO.username(),
+                roles));
     }
 
     public void createUser(SignInDTO dto) {
 
         System.out.println("Create user");
-        
+
         UUID userId = UUID.randomUUID();
 
-        var createdUserData = jdbcClient.sql("INSERT INTO user_data(id, username, email, first_name, last_name) values(?, ?, ?, ?, ?, ?)")
+        var createdUserData = jdbcClient.sql("INSERT INTO user_data(id,username,email,first_name,last_name) values(?,?,?,?,?)")
                 .params(List.of(
                         userId,
                         dto.username(),
@@ -87,6 +85,7 @@ public class UserRepository {
                 .query(Integer.class)
                 .optional()
                 .orElseThrow(() -> new IllegalStateException("Роль '" + DEFAULT_USER_ROLE + "' не найдена в базе данных"));
+        System.out.println(clientUserRoleId);
 
         var createdUserRole = jdbcClient.sql("INSERT INTO user_roles(user_id, role_id) VALUES (?, ?)")
                 .params(List.of(userId, clientUserRoleId))
@@ -94,6 +93,7 @@ public class UserRepository {
 
         Assert.state(createdUserRole == 1, "Не удалось назначить роль '" + DEFAULT_USER_ROLE + "' пользователю " + dto.username());
     }
+
 
 
 //    public Optional<User> findByUserName(String username) {   

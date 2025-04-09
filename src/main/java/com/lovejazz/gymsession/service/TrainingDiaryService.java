@@ -75,8 +75,9 @@ public class TrainingDiaryService {
 
     }
 
-    public void create(TrainingDiaryDAO trainingDiaryDAO) {
+    public void create(TrainingDiaryDAO trainingDiaryDAO, String accessToken) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication != null && authentication.isAuthenticated()) {
             Object principal = authentication.getPrincipal();
             if (principal instanceof UserDetailsImpl userDetails) {

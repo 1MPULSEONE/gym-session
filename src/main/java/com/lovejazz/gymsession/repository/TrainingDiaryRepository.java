@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Repository
@@ -21,28 +22,31 @@ public class TrainingDiaryRepository {
     public List<TrainingDiaryDTO> findAll() {
         return jdbcClient.sql("SELECT * FROM Training_Diary")
                 .query((rs, rowNum) -> {
-                    ;
+                    UUID userId = rs.getObject("user_id", UUID.class);
                     return new TrainingDiaryDTO(rs.getInt("id"),
-                            rs.getInt("user_id"),
+                            userId,
                             rs.getString("name"),
                             rs.getInt("sport_type_id"));
                 })
                 .list();
     }
 
-    public Optional<TrainingDiaryDTO> findById(@RequestParam Integer id, Integer userId) {
+    public Optional<TrainingDiaryDTO> findById(@RequestParam Integer id, UUID userId) {
         return jdbcClient.sql("SELECT * FROM Training_Diary WHERE id = :id AND user_id = :userId")
                 .param("id", id)
                 .param("userId", userId)
-                .query((rs, rowNum) -> new TrainingDiaryDTO(rs.getInt("id"),
-                        rs.getInt("user_id"),
-                        rs.getString("name"),
-                        rs.getInt("sport_type_id")))
+                .query((rs, rowNum) -> {
+                    UUID trainingDiaryUserId = rs.getObject("user_id", UUID.class);
+                    return new TrainingDiaryDTO(rs.getInt("id"),
+                            trainingDiaryUserId,
+                            rs.getString("name"),
+                            rs.getInt("sport_type_id"));
+                })
                 .optional();
     }
 
 
-    public void create(TrainingDiaryDTO diary, Integer userId) {
+    public void create(TrainingDiaryDTO diary, UUID userId) {
         var created = jdbcClient.sql("INSERT INTO Training_Diary(id,user_id,name,sport_type_id) values(?,?,?,?)")
                 .params(List.of(diary.id(), userId, diary.name(), diary.sportTypeId()))
                 .update();
@@ -50,14 +54,14 @@ public class TrainingDiaryRepository {
 
     }
 
-    public void update(TrainingDiaryDTO diary, Integer diaryId, Integer userId) {
+    public void update(TrainingDiaryDTO diary, Integer diaryId, UUID userId) {
         var updated = jdbcClient.sql("UPDATE Training_Diary set id = ?, user_id = ?, name = ?, sport_type_id = ? where id = ?")
                 .params(List.of(diary.id(), userId, diary.name(), diary.sportTypeId(), diaryId))
                 .update();
         Assert.state(updated == 1, "Failed to update run " + diary.name());
     }
 
-    public void delete(Integer id, Integer userId) {
+    public void delete(Integer id, UUID userId) {
         var deleted = jdbcClient.sql("DELETE from Training_Diary WHERE id = :id and user_id = :userId").param("id", id).param("user_id", userId).update();
     }
 

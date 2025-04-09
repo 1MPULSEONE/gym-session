@@ -2,6 +2,7 @@ package com.lovejazz.gymsession.security.service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.lovejazz.gymsession.model.user.User;
@@ -13,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDetailsImpl implements UserDetails {
 
-    private Integer id;
+    private UUID id;
 
     private String username;
 
@@ -24,11 +25,10 @@ public class UserDetailsImpl implements UserDetails {
 
 
 
-    public UserDetailsImpl(Integer id, String username, String password,
+    public UserDetailsImpl(UUID id, String username,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
-        this.password = password;
         this.authorities = authorities;
     }
 
@@ -41,7 +41,6 @@ public class UserDetailsImpl implements UserDetails {
         return new UserDetailsImpl(
                 user.id(),
                 user.username(),
-                user.password(),
                 authorities);
     }
 
@@ -50,7 +49,7 @@ public class UserDetailsImpl implements UserDetails {
         return authorities;
     }
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 

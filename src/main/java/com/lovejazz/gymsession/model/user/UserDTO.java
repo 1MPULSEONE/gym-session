@@ -1,10 +1,11 @@
 package com.lovejazz.gymsession.model.user;
 
+import java.util.UUID;
+
 import com.lovejazz.gymsession.model.role.Role;
 
 public record UserDTO(
-        Integer id,
-        String password,
+        UUID id,
         String username,
         Role role
 ) {

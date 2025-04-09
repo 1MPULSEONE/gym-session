@@ -1,5 +1,6 @@
 package com.lovejazz.gymsession.controller;
 
+import com.lovejazz.gymsession.exception.UserAlreadyExistsException;
 import com.lovejazz.gymsession.payload.request.LoginRequest;
 import com.lovejazz.gymsession.payload.request.LoginViaGoogleRequest;
 import com.lovejazz.gymsession.payload.request.SignUpRequest;
@@ -26,6 +27,8 @@ public class TestAuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
+            System.out.println("TEST CONTROLLER2");
+
             String token = authService.authenticateAndGetToken(loginRequest.getUsername(),loginRequest.getPassword());
 
             Cookie cookie = new Cookie("access_token", token);
@@ -74,7 +77,6 @@ public class TestAuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequest signUpRequest, HttpServletResponse response) {
-        System.out.println("TEST CONTROLLER");
         try {
             String token = authService.registerAndGetToken(signUpRequest.getUsername(),signUpRequest.getEmail(), signUpRequest.getFirstName(),signUpRequest.getLastName(),signUpRequest.getPassword());
 
@@ -117,7 +119,7 @@ public class TestAuthController {
 
 
             Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("message", "Authentication successful");
+            responseBody.put("message", "Authentication successful or user already existed");
             responseBody.put("token", token);
 
             return ResponseEntity.ok(responseBody);
@@ -126,10 +128,19 @@ public class TestAuthController {
             e.printStackTrace();
 
             Map<String, Object> errorBody = new HashMap<>();
-            errorBody.put("error", "Authentication failed");
+            errorBody.put("error", "Authentication or processing failed");
             errorBody.put("message", e.getMessage());
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorBody);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
         }
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, Object> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+        Map<String, Object> errorBody = new HashMap<>();
+        errorBody.put("error", "Conflict");
+        errorBody.put("message", ex.getMessage());
+        return errorBody;
     }
 }
