@@ -25,7 +25,7 @@ public class TrainingDiaryController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasRole('ROLE_client_admin') ")
+    @PreAuthorize("hasRole('client_admin') ")
     List<TrainingDiaryDAO> findAll() {
         return trainingDiaryService.findAll();
     }
