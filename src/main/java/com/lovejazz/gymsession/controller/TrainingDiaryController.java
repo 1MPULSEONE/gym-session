@@ -20,34 +20,35 @@ public class TrainingDiaryController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasRole('ROLE_client_admin') ")
+    @PreAuthorize("hasRole('client_admin') ")
     List<TrainingDiaryDAO> findAll() {
         return trainingDiaryService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('client_user')")
     TrainingDiaryDAO findById(@PathVariable Integer id) {
         return trainingDiaryService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('client_user')")
     void create(@Valid @RequestBody TrainingDiaryDAO diary) {
+        System.out.println("POST CREATE SUCCESS");
         trainingDiaryService.create(diary);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('client_user')")
     void update(@Valid @RequestBody TrainingDiaryDAO diary, @PathVariable Integer id) {
         trainingDiaryService.update(diary, id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('client_user')")
     void delete(@PathVariable Integer id) {
         trainingDiaryService.delete(id);
     }

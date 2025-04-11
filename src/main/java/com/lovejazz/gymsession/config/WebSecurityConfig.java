@@ -72,6 +72,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/keycloak_auth/**").permitAll()
+                                .requestMatchers("/api/logs/**").permitAll()
                                 .requestMatchers("/api/test/**").authenticated()
 //                                .anyRequest().authenticated()
                 )
