@@ -25,20 +25,20 @@ public class TrainingDiaryController {
     }
 
     @GetMapping("")
-    @PreAuthorize("hasRole('client_admin') ")
+    @PreAuthorize("hasRole('ROLE_client_admin') ")
     List<TrainingDiaryDAO> findAll() {
         return trainingDiaryService.findAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('client_user')")
+    @PreAuthorize("hasRole('ROLE_client_user')")
     TrainingDiaryDAO findById(@PathVariable Integer id) {
         return trainingDiaryService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    @PreAuthorize("hasRole('client_user')")
+    @PreAuthorize("hasRole('ROLE_client_user')")
     void create(@Valid @RequestBody TrainingDiaryDAO diary,
                 @CookieValue(name = "access_token", required = true) String accessToken) {
 
@@ -46,19 +46,19 @@ public class TrainingDiaryController {
 
         logger.info("Создание TrainingDiary. Access Token из cookie: {}", accessToken);
 
-        trainingDiaryService.create(diary, accessToken);
+        trainingDiaryService.create(diary);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('client_user')")
+    @PreAuthorize("hasRole('ROLE_client_user')")
     void update(@Valid @RequestBody TrainingDiaryDAO diary, @PathVariable Integer id) {
         trainingDiaryService.update(diary, id);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('client_user')")
+    @PreAuthorize("hasRole('ROLE_client_user')")
     void delete(@PathVariable Integer id) {
         trainingDiaryService.delete(id);
     }

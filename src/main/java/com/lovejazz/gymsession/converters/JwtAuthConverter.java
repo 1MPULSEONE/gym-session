@@ -9,7 +9,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimNames;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -21,9 +20,6 @@ import java.util.stream.Stream;
 @Component
 public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationToken> {
 
-    private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
-            new JwtGrantedAuthoritiesConverter();
-
     @Value("${jwt.auth.converter.principle-attribute}")
     private String principleAttribute;
     @Value("${jwt.auth.converter.resource-id}")
@@ -31,16 +27,9 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
 
     @Override
     public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
-        Collection<GrantedAuthority> authorities = Stream.concat(
-                jwtGrantedAuthoritiesConverter.convert(jwt).stream(),
-                extractResourceRoles(jwt).stream()
-        ).collect(Collectors.toSet());
+        Collection<GrantedAuthority> authorities = extractResourceRoles(jwt);
 
-        return new JwtAuthenticationToken(
-                jwt,
-                authorities,
-                getPrincipleClaimName(jwt)
-        );
+        return new JwtAuthenticationToken(jwt, authorities, getPrincipleClaimName(jwt));
     }
 
     private String getPrincipleClaimName(Jwt jwt) {
@@ -48,27 +37,47 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
         if (principleAttribute != null) {
             claimName = principleAttribute;
         }
-        return jwt.getClaim(claimName);
+        return jwt.hasClaim(claimName) ? jwt.getClaimAsString(claimName) : jwt.getSubject();
     }
 
-    private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
-        Map<String, Object> resourceAccess;
-        Map<String, Object> resource;
-        Collection<String> resourceRoles;
-        if (jwt.getClaim("resource_access") == null) {
+    private Collection<GrantedAuthority> extractResourceRoles(Jwt jwt) {
+        // Проверяем наличие resource_access в токене
+        if (!jwt.hasClaim("resource_access")) {
             return Set.of();
         }
-        resourceAccess = jwt.getClaim("resource_access");
 
-        if (resourceAccess.get(resourceId) == null) {
+        // Получаем resource_access как Map
+        Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
+
+        // Проверяем, что resourceId задан и существует в resource_access
+        if (resourceId == null || !resourceAccess.containsKey(resourceId)) {
             return Set.of();
         }
-        resource = (Map<String, Object>) resourceAccess.get(resourceId);
 
-        resourceRoles = (Collection<String>) resource.get("roles");
-        return resourceRoles
-                .stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toSet());
+        // Получаем ресурс (клиент) по resourceId
+        Object resourceObj = resourceAccess.get(resourceId);
+        if (!(resourceObj instanceof Map)) {
+            return Set.of();
+        }
+
+        Map<String, Object> resource = (Map<String, Object>) resourceObj;
+
+        // Проверяем наличие roles в ресурсе
+        if (!resource.containsKey("roles")) {
+            return Set.of();
+        }
+
+        Object rolesObj = resource.get("roles");
+        if (!(rolesObj instanceof Collection)) {
+            return Set.of();
+        }
+
+        // Преобразуем роли в GrantedAuthority
+        try {
+            return ((Collection<?>) rolesObj).stream().filter(String.class::isInstance).map(role -> "ROLE_" + role.toString()).map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
+        } catch (ClassCastException e) {
+            System.err.println("Ошибка приведения типа для ролей: " + e.getMessage());
+            return Set.of();
+        }
     }
 }
