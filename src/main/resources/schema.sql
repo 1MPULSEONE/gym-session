@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS sport_type
 CREATE TABLE IF NOT EXISTS training_diary
 (
     id            INT          NOT NULL UNIQUE,
-    user_id       INT          NOT NULL,
+    user_id       UUID          NOT NULL UNIQUE,
     name          VARCHAR(250) NOT NULL,
     sport_type_id INT,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -30,9 +30,11 @@ CREATE TABLE IF NOT EXISTS role
 
 CREATE TABLE IF NOT EXISTS user_data
 (
-    id         INT          NOT NULL UNIQUE,
-    password   VARCHAR(256) NOT NULL,
+    id         UUID          NOT NULL UNIQUE,
     username      VARCHAR(256) NOT NULL UNIQUE,
+    email      VARCHAR(256) NOT NULL UNIQUE,
+    first_name      VARCHAR(256) NOT NULL,
+    last_name      VARCHAR(256) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
@@ -41,7 +43,7 @@ CREATE TABLE IF NOT EXISTS user_data
 CREATE TABLE IF NOT EXISTS user_roles
 (
     role_id INT NOT NULL,
-    user_id    INT NOT NULL,
+    user_id    UUID NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES role (id),

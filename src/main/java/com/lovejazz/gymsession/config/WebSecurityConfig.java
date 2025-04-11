@@ -2,7 +2,6 @@ package com.lovejazz.gymsession.config;
 
 import com.lovejazz.gymsession.converters.JwtAuthConverter;
 import com.lovejazz.gymsession.security.jwt.AuthEntryPointJwt;
-import com.lovejazz.gymsession.security.jwt.AuthTokenFilter;
 import com.lovejazz.gymsession.security.jwt.JwtUtils;
 import com.lovejazz.gymsession.security.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Configuration
@@ -37,11 +35,6 @@ public class WebSecurityConfig {
         this.unauthorizedHandler = unauthorizedHandler;
         this.jwtUtils = jwtUtils;
         this.jwtAuthConverter = jwtAuthConverter;
-    }
-
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter(userDetailsService, jwtUtils);
     }
 
     @Bean
@@ -67,14 +60,12 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/keycloak_auth/**").permitAll()
-                                .requestMatchers("/api/logs/**").permitAll()
-                                .requestMatchers("/api/test/**").authenticated()
-//                                .anyRequest().authenticated()
+                                .requestMatchers("/api/**").authenticated()
+                                .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
@@ -84,7 +75,6 @@ public class WebSecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

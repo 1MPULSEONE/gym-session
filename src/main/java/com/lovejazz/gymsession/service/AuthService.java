@@ -5,28 +5,38 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.lovejazz.gymsession.exception.UserAlreadyExistsException;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.lovejazz.gymsession.model.user.SignInDTO;
+import com.lovejazz.gymsession.repository.UserRepository;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
+
+import com.lovejazz.gymsession.model.user.User;
 
 @Service
 public class AuthService {
     private final String keycloakClientSecret;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
-    public AuthService(RestTemplate restTemplate,ObjectMapper objectMapper) {
+
+    public AuthService(RestTemplate restTemplate,ObjectMapper objectMapper, UserRepository userRepository) {
         Dotenv dotenv = Dotenv.load();
        this.keycloakClientSecret = dotenv.get("KEYCLOAK_CLIENT_SECRET");
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.userRepository = userRepository;
     }
 
     public String authenticateAndGetToken(String username, String password) {
@@ -50,6 +60,26 @@ public class AuthService {
             try {
                 JsonNode root = objectMapper.readTree(response.getBody());
                 String accessToken = root.path("access_token").asText();
+                Optional<User> existingUser = userRepository.findByUserName(username);
+                if (existingUser.isEmpty()) {
+                    try {
+                        SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                        JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+
+                        String firstName = claimsSet.getStringClaim("given_name");
+                        String lastName = claimsSet.getStringClaim("family_name");
+                        String email = claimsSet.getStringClaim("email");
+                        String preferredUsername = claimsSet.getStringClaim("preferred_username");
+
+                        userRepository.createUser(new SignInDTO(email, preferredUsername, firstName, lastName));
+
+                    } catch (ParseException e) {
+                        System.err.println("Ошибка парсинга JWT токена, полученного после обмена: " + e.getMessage());
+                        throw new RuntimeException("Ошибка обработки данных пользователя из токена.", e);
+                    } catch (UserAlreadyExistsException e) {
+                        throw e;
+                    }
+                }
                 return accessToken;
             } catch (IOException e) {
                 throw new RuntimeException("Failed to parse JSON response: " + e.getMessage(), e);
@@ -89,6 +119,7 @@ public class AuthService {
 
     public String registerAndGetToken(String username, String email, String firstName, String lastName, String password) throws JsonProcessingException {
         String accessToken = this.getUserCreatorToken();
+        System.out.println(accessToken + " - accessToken");
         String url = "http://localhost:8080/admin/realms/develop/users";
 
         HttpHeaders headers = new HttpHeaders();
@@ -123,6 +154,7 @@ public class AuthService {
 
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
+                userRepository.createUser(new SignInDTO(email, username, firstName, lastName));
                 return this.authenticateAndGetToken(username, password);
             } catch (Exception authException) {
                 throw new RuntimeException("User created, but authentication failed: " + authException.getMessage(), authException);
@@ -153,13 +185,35 @@ public class AuthService {
         if (response.getStatusCode().is2xxSuccessful()) {
             try {
                 JsonNode root = objectMapper.readTree(response.getBody());
+                System.out.println(root + "root");
                 String accessToken = root.path("access_token").asText();
+                try {
+                    SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                    JWTClaimsSet claimsSet = signedJWT.getJWTClaimsSet();
+
+                    String firstName = claimsSet.getStringClaim("given_name");
+                    String lastName = claimsSet.getStringClaim("family_name");
+                    String email = claimsSet.getStringClaim("email");
+                    String preferredUsername = claimsSet.getStringClaim("preferred_username");
+
+                    Optional<User> existingUser = userRepository.findByUserName(preferredUsername);
+                    if (!existingUser.isPresent()) {
+                        userRepository.createUser(new SignInDTO(email, preferredUsername, firstName, lastName));
+                    }
+
+                    
+                } catch (ParseException e) {
+                    System.err.println("Ошибка парсинга JWT токена, полученного после обмена: " + e.getMessage());
+                    throw new RuntimeException("Ошибка обработки данных пользователя из токена.", e);
+                } catch (UserAlreadyExistsException e) {
+                    throw e;
+                }
                 return accessToken;
             } catch (IOException e) {
-                throw new RuntimeException("Failed to parse JSON response: " + e.getMessage(), e);
+                throw new RuntimeException("Не удалось прочитать JSON ответ от сервера авторизации: " + e.getMessage(), e);
             }
         } else {
-            throw new RuntimeException("Authentication failed: " + response.getStatusCode());
+            throw new RuntimeException("Аутентификация через обмен токена не удалась: " + response.getStatusCode() + " Body: " + response.getBody());
         }
     }
 }
