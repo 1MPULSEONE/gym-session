@@ -41,20 +41,16 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     }
 
     private Collection<GrantedAuthority> extractResourceRoles(Jwt jwt) {
-        // Проверяем наличие resource_access в токене
         if (!jwt.hasClaim("resource_access")) {
             return Set.of();
         }
 
-        // Получаем resource_access как Map
         Map<String, Object> resourceAccess = jwt.getClaim("resource_access");
 
-        // Проверяем, что resourceId задан и существует в resource_access
         if (resourceId == null || !resourceAccess.containsKey(resourceId)) {
             return Set.of();
         }
 
-        // Получаем ресурс (клиент) по resourceId
         Object resourceObj = resourceAccess.get(resourceId);
         if (!(resourceObj instanceof Map)) {
             return Set.of();
@@ -62,7 +58,6 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
 
         Map<String, Object> resource = (Map<String, Object>) resourceObj;
 
-        // Проверяем наличие roles в ресурсе
         if (!resource.containsKey("roles")) {
             return Set.of();
         }
@@ -72,7 +67,6 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
             return Set.of();
         }
 
-        // Преобразуем роли в GrantedAuthority
         try {
             return ((Collection<?>) rolesObj).stream().filter(String.class::isInstance).map(role -> "ROLE_" + role.toString()).map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
         } catch (ClassCastException e) {
