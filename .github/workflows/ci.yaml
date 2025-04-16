@@ -25,14 +25,24 @@ jobs:
 
       - name: Execute SQL scripts
         run: |
-          docker cp src/main/resources/schema.sql postgres:/tmp/schema.sql
-          docker cp src/main/resources/data.sql postgres:/tmp/data.sql
+          CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep postgres)
+    
+          if [ -z "$CONTAINER_NAME" ]; then
+          echo "PostgreSQL container not found!"
+          docker ps -a
+          exit 1
+          fi
           
-          docker exec gym-session-postgres-1 psql -U admin -d gymsession -f /tmp/schema.sql
-          docker exec gym-session-postgres-1 psql -U admin -d gymsession -f /tmp/data.sql
+          echo "Using PostgreSQL container: $CONTAINER_NAME"
+          
+          docker cp src/main/resources/schema.sql $CONTAINER_NAME:/tmp/schema.sql
+          docker cp src/main/resources/data.sql $CONTAINER_NAME:/tmp/data.sql
+          
+          docker exec $CONTAINER_NAME psql -U admin -d gymsession -f /tmp/schema.sql
+          docker exec $CONTAINER_NAME psql -U admin -d gymsession -f /tmp/data.sql
           
           echo "Listing tables in gymsession database:"
-          docker exec gym-session-postgres-1 psql -U admin -d gymsession -c "\dt"
+          docker exec $CONTAINER_NAME psql -U admin -d gymsession -c "\dt"
 
       - name: Start keycloack
         run: |
