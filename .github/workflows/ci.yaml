@@ -38,6 +38,14 @@ jobs:
           docker ps -a
           docker logs keycloak
 
+      - name: Start ELK stack
+        run: |
+          cd elk
+          docker compose up -d
+          sleep 30  # Даем время для инициализации ELK
+          docker ps
+          curl -X GET "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=50s"
+
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
@@ -62,6 +70,12 @@ jobs:
         with:
           name: gymsession.jar
           path: target/*.jar
+
+      - name: Check ELK logs
+        if: always()
+        run: |
+            docker logs elk-logstash-1
+            curl -X GET "http://localhost:9200/_cat/indices?v"
 
       - name: Stop containers
         if: always()
