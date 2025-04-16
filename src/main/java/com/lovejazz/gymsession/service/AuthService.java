@@ -9,6 +9,7 @@ import com.lovejazz.gymsession.exception.UserAlreadyExistsException;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -25,15 +26,16 @@ import com.lovejazz.gymsession.model.user.User;
 
 @Service
 public class AuthService {
-    private final String keycloakClientSecret;
+    @Value("${keycloak.client.secret:#{null}}") String keycloakClientSecret;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
 
 
     public AuthService(RestTemplate restTemplate,ObjectMapper objectMapper, UserRepository userRepository) {
-        Dotenv dotenv = Dotenv.load();
-       this.keycloakClientSecret = dotenv.get("KEYCLOAK_CLIENT_SECRET");
+        this.keycloakClientSecret = Optional.ofNullable(keycloakClientSecret)
+                .or(() -> Optional.ofNullable(System.getenv("KEYCLOAK_CLIENT_SECRET")))
+                .orElseGet(() -> Dotenv.load().get("KEYCLOAK_CLIENT_SECRET"));
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
