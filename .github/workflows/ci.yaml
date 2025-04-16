@@ -19,8 +19,8 @@ jobs:
 
       - name: Start containers
         run: |
-            docker-compose up -d
-            sleep 10 
+           docker compose up -d 
+            sleep 15 
             docker ps
 
       - name: Cache Maven dependencies
@@ -47,3 +47,7 @@ jobs:
         with:
           name: gymsession.jar
           path: target/*.jar
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose down
