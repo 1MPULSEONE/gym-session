@@ -20,8 +20,8 @@ jobs:
       - name: Start postgres
         run: |
            docker compose up -d 
-            sleep 15 
-            docker ps
+           sleep 15 
+           docker ps
 
       - name: Start keycloack
         run: |
@@ -33,9 +33,9 @@ jobs:
           -e KC_FEATURES=token-exchange,admin-fine-grained-authz  \
           quay.io/keycloak/keycloak:26.1.3 start-dev
           
-         sleep 25
-         docker ps
-         docker logs keycloak
+          sleep 25
+          docker ps
+          docker logs keycloak
           
 #      - name: Wait for Keycloak to be healthy
 #        run: |
