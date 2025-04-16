@@ -64,6 +64,12 @@ jobs:
 
       - name: Build JAR with Maven
         run: mvn -B package
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/gymsession
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          KEYCLOAK_URL: http://localhost:8080
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
@@ -74,7 +80,7 @@ jobs:
       - name: Check ELK logs
         if: always()
         run: |
-            docker logs elk-logstash-1
+            docker logs logstash_springboot
             curl -X GET "http://localhost:9200/_cat/indices?v"
 
       - name: Stop containers
