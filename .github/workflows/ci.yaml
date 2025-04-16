@@ -17,6 +17,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Start containers
+        run: |
+            docker-compose up -d
+            sleep 10 
+            docker ps
+
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
@@ -26,6 +32,12 @@ jobs:
 
       - name: Run tests with Maven
         run: mvn -B test
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/gymsession
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          KEYCLOAK_URL: http://localhost:8080
 
       - name: Build JAR with Maven
         run: mvn -B package
