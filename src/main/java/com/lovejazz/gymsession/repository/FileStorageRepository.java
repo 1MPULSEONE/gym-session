@@ -20,7 +20,7 @@ public class FileStorageRepository {
     public void create(FileStorageDTO fileStorage) {
         System.out.println(fileStorage);
         var created = jdbcClient.sql("""
-    INSERT INTO file_storage(id, key_s3, file_name, file_type, created_at, updated_at) 
+    INSERT INTO file_storage(id, key_s3, file_name, file_type) 
     VALUES (?, ?, ?, ?)
     """)
                 .params(List.of(
