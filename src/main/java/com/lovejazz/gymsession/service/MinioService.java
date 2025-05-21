@@ -126,4 +126,25 @@ public class MinioService {
     public void updateFileRecord(FileStorageDTO fileRecord) {
         fileStorageRepository.update(fileRecord);
     }
+
+    public String generateDownloadUrl(String fileKey) {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucketName)
+                            .object(fileKey)
+                            .expiry(1, TimeUnit.HOURS) // Вы можете настроить время жизни ссылки
+                            .build());
+        } catch (Exception e) {
+            log.error("Failed to generate download URL for key: {}", fileKey, e);
+            throw new RuntimeException("Error generating download URL", e);
+        }
+    }
+
+    public String generateDownloadUrlById(UUID fileId) {
+        FileStorageDTO fileRecord = fileStorageRepository.findById(fileId)
+                .orElseThrow(() -> new RuntimeException("File record not found with id: " + fileId));
+        return generateDownloadUrl(fileRecord.keyS3());
+    }
 } 
