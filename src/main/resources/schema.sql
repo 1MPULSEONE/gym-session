@@ -50,3 +50,14 @@ CREATE TABLE IF NOT EXISTS user_roles
     FOREIGN KEY (user_id) REFERENCES user_data (id),
     PRIMARY KEY (role_id, user_id)
 );
+
+CREATE TABLE IF NOT EXISTS file_storage
+(
+    id         UUID          NOT NULL UNIQUE,
+    key_s3     VARCHAR(500)  NOT NULL UNIQUE,
+    file_name  VARCHAR(256)  NOT NULL,
+    file_type  VARCHAR(100)  NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
