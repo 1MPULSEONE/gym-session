@@ -32,7 +32,7 @@ public class FileController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
-            @RequestParam String uploadUrl,
+           @RequestParam String uploadUrl,
             @RequestParam("file") MultipartFile file) {
         try {
             minioService.uploadFile(uploadUrl, file);
@@ -42,8 +42,8 @@ public class FileController {
         }
     }
 
-    @GetMapping("/download-url/{fileId}")
-    public ResponseEntity<String> getDownloadUrl(@PathVariable UUID fileId) {
+    @GetMapping("/download")
+    public ResponseEntity<String> getDownloadUrl(@RequestParam UUID fileId) {
         try {
             String downloadUrl = minioService.generateDownloadUrlById(fileId);
             return ResponseEntity.ok(downloadUrl);
