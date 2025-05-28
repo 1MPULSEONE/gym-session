@@ -1,34 +1,34 @@
 package com.lovejazz.gymsession.service;
 
 import com.lovejazz.gymsession.model.exercise.ExerciseDto;
-import io.github.cdimascio.dotenv.Dotenv;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
 @Service
-public class ApiNinjasExerciseAdapter implements ExerciseService {
+public class ExerciseSyncService {
     private final WebClient webClient;
-    private final String apiKey;
+    private final ExerciseService exerciseService;
 
-    public ApiNinjasExerciseAdapter(WebClient.Builder webClientBuilder) {
-        Dotenv dotenv = Dotenv.load(); 
-        this.apiKey = dotenv.get("API_NINJAS_KEY");
-
+    public  ExerciseSyncService(WebClient.Builder webClientBuilder, ExerciseService exerciseService) {
+        this.exerciseService = exerciseService;
         this.webClient = webClientBuilder
-                .baseUrl("https://api.api-ninjas.com/v1")
-                .defaultHeader("X-Api-Key", this.apiKey)
+                .baseUrl("http://localhost:7070/api/")
                 .build();
+
     }
 
-    @Override
     public List<ExerciseDto> getExercisesByMuscle(String muscle) {
-        return webClient.get()
+        List<ExerciseDto> exerciseDtos =  webClient.get()
                 .uri("/exercises?muscle={muscle}", muscle)
                 .retrieve()
                 .bodyToFlux(ExerciseDto.class)
                 .collectList()
                 .block();
+
+        exerciseService.processExercises(exerciseDtos);
+        return exerciseDtos;
     }
 }

@@ -50,3 +50,13 @@ CREATE TABLE IF NOT EXISTS user_roles
     FOREIGN KEY (user_id) REFERENCES user_data (id),
     PRIMARY KEY (role_id, user_id)
 );
+CREATE TABLE IF NOT EXISTS exercises
+(
+    id           UUID         NOT NULL UNIQUE,
+    name         VARCHAR(512) NOT NULL,
+    type         VARCHAR(256) NOT NULL,
+    muscle       VARCHAR(256) NOT NULL,
+    equipment    VARCHAR(512) NOT NULL,
+    difficulty   VARCHAR(256) NOT NULL,
+    instructions TEXT NOT NULL
+);
