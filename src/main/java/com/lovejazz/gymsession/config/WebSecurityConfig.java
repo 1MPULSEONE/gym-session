@@ -66,6 +66,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/keycloak_auth/**").permitAll()
                                 .requestMatchers("/api/logs/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
+                                .requestMatchers("/api/exercises/**").permitAll()
                                 .requestMatchers("/api/**").authenticated()
                                 .anyRequest().authenticated()
                 )
